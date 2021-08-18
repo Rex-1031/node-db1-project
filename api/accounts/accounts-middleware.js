@@ -1,31 +1,36 @@
+const Accounts = require('./accounts-model.js')
+const db = require('../../data/db-config.js')
+
+
+
 exports.checkAccountPayload = (req, res, next) => {
   const { name, budget, id} = req.body
   
-  if(!budget || !budget.trim() || !name || !name.trim()){
+  if(!req.body.budget || !req.body.name){
     res.status(400).json({
-      message: '"name and budget are required"'
+      message: "name and budget are required"
     })
-  
-    if(typeof name  !== 'string'){
+  }
+    else if(typeof req.body.name  !== 'string'){
     res.status(400).json({
        message: "name of account must be a string"
     })
     }
-    if(name.trim()< 3 || name.trim() > 100){
+   else if(req.body.name.length <= 3 || req.body.name.length > 100){
       res.status(400).json({
         message: "name of account must be between 3 and 100"
       })
     }
-    if(typeof budget !== 'number' ){
+    else if(typeof req.body.budget !== 'number' ){
       res.status(400).json({
         message: "budget of account must be a number"
       })
     }
-    if(budget < 0 || budget > 1000000){
+    else if(req.body.budget < 0 || req.body.budget > 1000000){
       res.status(400).json({
         message: "budget of account is too large or too small"
       })
-    }
+    
   }else{
     req.name = name.trim()
     req.budget = budget
@@ -35,13 +40,13 @@ exports.checkAccountPayload = (req, res, next) => {
 }
 
 exports.checkAccountNameUnique = async (req, res, next) => {
-  const accountName = await Accounts.get(req.body.name)
-  if (accountName){
+  const accountName = await Accounts.getAll()
+  const nameCheck = accountName.filter(account => account.name === req.body.name)
+  if (nameCheck.name === req.body.name){
     res.status(400).json({
       message: "that name is taken"
     })
   }else{
-    req.accountName = accountName
     next()
   }
   
@@ -49,13 +54,14 @@ exports.checkAccountNameUnique = async (req, res, next) => {
 
 exports.checkAccountId = async (req, res, next) => {
   try {
-    const accounts = await Accounts.get(req.params.id)
-    if(!accounts){
+    const accountsId = await Accounts.getById(req.params.id)
+
+    if(!accountsId){
       res.status(404).json({
         message: "account not found"
       })
     }else{
-      req.accounts = accounts
+      req.accountsId = accountsId
       next()
     }
     

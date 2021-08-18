@@ -4,9 +4,9 @@ const {
   checkAccountId,
   checkAccountNameUnique,
   checkAccountPayload
-} = require("./accounts/middleware")
+} = require("./accounts-middleware.js")
 
-const router = require('express').Router()
+const router = express.Router()
 
 router.get('/', async (req, res, next) => {
   try{
